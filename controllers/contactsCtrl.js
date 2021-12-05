@@ -1,9 +1,11 @@
-const Contact = require("../model");
+const Contact = require('../repository/contactsModel');
+const { HttpCode } = require('../helper/const');
 
 const listContacts = async (_req, res, next) => {
   try {
-    const contacts = await Contact.listContacts();
-    return res.json({ status: "success", code: 200, data: { contacts } });
+    const userId = req.user.id;
+    const contacts = await Contact.listContacts(userId, req.query);
+    return res.json({ ...contacts });
   } catch (error) {
     next();
   }
@@ -11,13 +13,12 @@ const listContacts = async (_req, res, next) => {
 
 const getContactById = async (req, res, next) => {
   try {
-    const contact = await Contact.getContactById(req.params.contactId);
+    const userId = req.user.id;
+    const contact = await Contact.getContactById(req.params.contactId, userId);
     if (!contact) {
-      return res.status(400).json({ message: "Not found" });
+      return res.status(HttpCode.BAD_REQEST).json({ message: 'Not found' });
     }
-    return res
-      .status(201)
-      .json({ status: "success", code: 201, data: { contact } });
+    return res.status(HttpCode.OK).json({ contacts });
   } catch (error) {
     next(error);
   }
@@ -25,13 +26,16 @@ const getContactById = async (req, res, next) => {
 
 const addContact = async (req, res, next) => {
   try {
-    const contact = await Contact.addContact(req.body);
+    const userId = req.user.id;
+    const contact = await Contact.addContact({ ...req.body, owner: userId });
     if (!contact) {
-      return res.status(400).json({ message: "missing required name field" });
+      return res
+        .status(HttpCode.BAD_REQEST)
+        .json({ message: 'missing required name field' });
     }
     return res
-      .status(201)
-      .json({ status: "success", code: 201, data: { contact } });
+      .status(HttpCode.CREATED)
+      .json({ status: 'success', code: 201, data: { contact } });
   } catch (error) {
     next(error);
   }
@@ -39,13 +43,14 @@ const addContact = async (req, res, next) => {
 
 const removeContact = async (req, res, next) => {
   try {
-    const contact = await Contact.removeContact(req.params.contactId);
+    const userId = req.user.id;
+    const contact = await Contact.removeContact(req.params.contactId, userId);
     if (contact) {
       return res
-        .status(200)
-        .json({ status: "success", code: 201, data: { contact } });
+        .status(HttpCode.OK)
+        .json({ status: 'success', code: 201, data: { contact } });
     }
-    return res.status(404).json({ message: "Not found" });
+    return res.status(HttpCode.NOT_FOUND).json({ message: 'Not found' });
   } catch (error) {
     next(error);
   }
@@ -53,22 +58,47 @@ const removeContact = async (req, res, next) => {
 
 const updateContact = async (req, res, next) => {
   try {
-    const contact = await Contact.updateContact(req.params.contactId, req.body);
+    const userId = req.user.id;
+    const contact = await Contact.updateContact(
+      req.params.contactId,
+      req.body,
+      userId
+    );
     if (contact) {
       return res
-        .status(200)
-        .json({ status: "success", code: 201, data: { contact } });
+        .status(HttpCode.OK)
+        .json({ status: 'success', code: 201, data: { contact } });
     }
-    return res.status(404).json({ message: "Not found" });
+    return res.status(HttpCode.NOT_FOUND).json({ message: 'missing fields' });
   } catch (error) {
     next(error);
   }
 };
-
+const getFavorite = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const contact = await Contact.updateContact(
+      req.params.contactId,
+      req.body,
+      userId
+    );
+    if (contact) {
+      return res
+        .status(HttpCode.OK)
+        .json({ status: 'success', code: 201, data: { contact } });
+    }
+    return res
+      .status(HttpCode.NOT_FOUND)
+      .json({ message: 'missing field favorite' });
+  } catch (error) {
+    next(error);
+  }
+};
 module.exports = {
   listContacts,
   getContactById,
   removeContact,
   addContact,
   updateContact,
+  getFavorite,
 };
