@@ -60,6 +60,7 @@ const updateVerificationToken = async (
     { verification, verificationToken }
   );
 };
+
 module.exports = {
   createUser,
   findUserById,

@@ -10,7 +10,6 @@ const Users = require('../repository/users');
 const { HttpCode } = require('../helper/const');
 
 const createFolder = require('../helper/create-folder');
-//const UploadAvatarService = require('../services/local-upload')
 const SECRET_KEY = process.env.SECRET_KEY;
 
 const signup = async (req, res, next) => {
