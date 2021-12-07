@@ -1,7 +1,19 @@
 const User = require('../model/user');
 
-const createUser = async ({ email, password, subscription }) => {
-  const user = new User({ email, password, subscription });
+const createUser = async ({
+  email,
+  password,
+  subscription,
+  verification,
+  verificationToken,
+}) => {
+  const user = new User({
+    email,
+    password,
+    subscription,
+    verification,
+    verificationToken,
+  });
   return await user.save();
 };
 
@@ -34,6 +46,21 @@ const updateAvatar = async (userId, avatar) => {
   return await User.findByIdAndUpdate(userId, { avatar });
 };
 
+const findByVerificationToken = async (verificationToken) => {
+  return await User.findOne({ verificationToken });
+};
+
+const updateVerificationToken = async (
+  userId,
+  verification,
+  verificationToken
+) => {
+  return await User.findByIdAndUpdate(
+    { _id: userId },
+    { verification, verificationToken }
+  );
+};
+
 module.exports = {
   createUser,
   findUserById,
@@ -41,4 +68,6 @@ module.exports = {
   updateToken,
   updateUserSubscription,
   updateAvatar,
+  findByVerificationToken,
+  updateVerificationToken,
 };
